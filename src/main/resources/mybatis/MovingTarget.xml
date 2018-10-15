@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mjc.realtime.mapper.IMovingTarget">
+    <resultMap id="movingTargetMap" type="MovingTarget">
+        <id column="id" property="id"></id>
+        <result column="type" property="type"></result>
+        <result column="phone" property="phone"></result>
+        <result column="ascription" property="ascription"></result>
+        <collection property="timePositions" ofType="TimePosition" column="id" select="getTimePosition"></collection>
+    </resultMap>
+
+    <select id="getTimePosition" parameterType="int" resultType="TimePosition">
+        select
+                t.id,
+                t.time,
+                t.lon,
+                t.lat,
+                t.height,
+                t.pid
+        from time_position t
+        where pid = #{id}
+    </select>
+
+    <select id="getiInfomation" resultMap="movingTargetMap" parameterType="MovingTarget">
+       select
+              i.id,
+              i.type,
+              i.phone,
+              i.ascription
+        from base_infomation i
+    </select>
+
+    <insert id="saveInfomation" parameterType="MovingTarget" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO base_infomation
+        (type, phone, ascription)
+        VALUES
+        (#{type}, #{phone}, #{ascription})
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            SELECT last_insert_id()
+        </selectKey>
+    </insert>
+
+    <insert id="saveTimePosition" parameterType="TimePosition" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO time_position
+        (time, lon, lat, height, pid)
+        VALUES
+        (#{time}, #{lon}, #{lat}, #{height}, #{pid})
+    </insert>
+</mapper>
