@@ -3,13 +3,16 @@
 <mapper namespace="com.mjc.realtime.mapper.IMovingTarget">
     <resultMap id="movingTargetMap" type="MovingTarget">
         <id column="id" property="id"></id>
-        <result column="type" property="type"></result>
-        <result column="phone" property="phone"></result>
-        <result column="ascription" property="ascription"></result>
+        <result column="id" property="id"></result>
+        <result column="type" property="options.type"></result>
+        <result column="phone" property="options.phone"></result>
+        <result column="ascriptions" property="options.ascriptions"></result>
+        <result column="startTime" property="startTime"></result>
+        <result column="endTime" property="endTime"></result>
         <collection property="timePositions" ofType="TimePosition" column="id" select="getTimePosition"></collection>
     </resultMap>
 
-    <select id="getTimePosition" parameterType="int" resultType="TimePosition">
+    <select id="getTimePosition" parameterType="String" resultType="TimePosition">
         select
                 t.id,
                 t.time,
@@ -24,20 +27,20 @@
     <select id="getiInfomation" resultMap="movingTargetMap" parameterType="MovingTarget">
        select
               i.id,
-              i.type,
+              t.url as type,
               i.phone,
-              i.ascription
+              i.ascriptions,
+              i.startTime,
+              i.endTime
         from base_infomation i
+        inner join types t on t.id = i.type
     </select>
 
-    <insert id="saveInfomation" parameterType="MovingTarget" useGeneratedKeys="true" keyProperty="id">
+    <insert id="saveInfomation" parameterType="MovingTarget" keyProperty="id">
         INSERT INTO base_infomation
-        (type, phone, ascription)
+        (id, type, phone, ascriptions, startTime, endTime)
         VALUES
-        (#{type}, #{phone}, #{ascription})
-        <selectKey keyProperty="id" resultType="int" order="AFTER">
-            SELECT last_insert_id()
-        </selectKey>
+        (#{id}, #{options.type}, #{options.phone}, #{options.ascriptions}, #{startTime}, #{endTime})
     </insert>
 
     <insert id="saveTimePosition" parameterType="TimePosition" useGeneratedKeys="true" keyProperty="id">

@@ -2,6 +2,7 @@ package com.mjc.realtime.controller;
 
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
+import com.mjc.realtime.vo.MovingTargetDataVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -9,6 +10,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:8085", maxAge = 3600)
@@ -19,8 +21,13 @@ public class UserController {
     private IMovingTargetService movingTargetService;
 
     @RequestMapping(value = "/movingTargets", method = {RequestMethod.GET})
-    public List<MovingTarget> movingTargets(){
-        return movingTargetService.getMovingTargetInfo();
+    public MovingTargetDataVo movingTargets(){
+        try {
+            return movingTargetService.getMovingTargetInfo();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @RequestMapping(value = "/saveMovingTarget", method = {RequestMethod.POST})

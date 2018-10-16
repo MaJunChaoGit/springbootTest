@@ -3,11 +3,28 @@ package com.mjc.realtime.entity;
 import java.util.List;
 
 public class MovingTarget {
-    private int id;
-    private int type;
-    private String phone;
-    private String ascription;
+    private String id;
+    private String startTime;
+    private String endTime;
+    private Options options;
     private List<TimePosition> timePositions;
+
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
 
     public List<TimePosition> getTimePositions() {
         return timePositions;
@@ -17,35 +34,19 @@ public class MovingTarget {
         this.timePositions = timePositions;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public int getType() {
-        return type;
+    public Options getOptions() {
+        return options;
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAscription() {
-        return ascription;
-    }
-
-    public void setAscription(String ascription) {
-        this.ascription = ascription;
+    public void setOptions(Options options) {
+        this.options = options;
     }
 }

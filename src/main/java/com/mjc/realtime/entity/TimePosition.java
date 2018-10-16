@@ -3,10 +3,10 @@ package com.mjc.realtime.entity;
 public class TimePosition {
     private int id;
     private String time;
-    private String lon;
-    private String lat;
-    private String height;
-    private int pid;
+    private Double lon;
+    private Double lat;
+    private Double height;
+    private String pid;
     private MovingTarget movingTarget;
 
     public MovingTarget getMovingTarget() {
@@ -33,35 +33,35 @@ public class TimePosition {
         this.time = time;
     }
 
-    public String getLon() {
+    public Double getLon() {
         return lon;
     }
 
-    public void setLon(String lon) {
+    public void setLon(Double lon) {
         this.lon = lon;
     }
 
-    public String getLat() {
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat(String lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
-    public String getHeight() {
+    public Double getHeight() {
         return height;
     }
 
-    public void setHeight(String height) {
+    public void setHeight(Double height) {
         this.height = height;
     }
 
-    public int getPid() {
+    public String getPid() {
         return pid;
     }
 
-    public void setPid(int pid) {
+    public void setPid(String pid) {
         this.pid = pid;
     }
 }
