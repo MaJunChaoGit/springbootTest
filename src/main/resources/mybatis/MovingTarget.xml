@@ -4,6 +4,7 @@
     <resultMap id="movingTargetMap" type="MovingTarget">
         <id column="id" property="id"></id>
         <result column="id" property="id"></result>
+        <result column="id" property="options.id"></result>
         <result column="type" property="options.type"></result>
         <result column="phone" property="options.phone"></result>
         <result column="ascriptions" property="options.ascriptions"></result>

@@ -31,20 +31,25 @@ public class MovingTargetService implements IMovingTargetService{
     }
     @Override
     public MovingTargetDataVo getMovingTargetInfo(){
+        // 获取数据库中所有的动目标信息
         List<MovingTarget> movingTargets = movingTargetDAO.getiInfomation();
+        // 新建一个动目标Vo类
         MovingTargetDataVo movingTargetDataVo = new MovingTargetDataVo();
+        // 获取第一个动目标的起始时间
         String overallStarttime = movingTargets.get(0).getStartTime();
+        // 获取第一个动目标的结束时间
         String overallEndtime = movingTargets.get(0).getEndTime();
+        // 遍历动目标数组, 找出最先的起始时间和最后的结束时间
         for (MovingTarget movingTarget : movingTargets) {
-
             try {
+                // 比较前后两个动目标的时间
                 int startResult = compareData(overallStarttime, movingTarget.getStartTime());
                 int endResult = compareData(overallEndtime, movingTarget.getEndTime());
-
+                // 当startResult = 1的时候覆盖起始时间
                 if (startResult == 1) {
                     overallStarttime = movingTarget.getStartTime();
                 }
-
+                // 当startResult = 0的时候覆盖结束时间
                 if (endResult == -1) {
                     overallEndtime = movingTarget.getEndTime();
                 }
@@ -52,8 +57,10 @@ public class MovingTargetService implements IMovingTargetService{
                 e.printStackTrace();
             }
         }
+        // 设置起始和结束时间
         movingTargetDataVo.setOverallStarttime(overallStarttime);
         movingTargetDataVo.setOverallEndtime(overallEndtime);
+        // 设置动目标数据给Vo类
         movingTargetDataVo.setData(movingTargets);
         return movingTargetDataVo;
     }

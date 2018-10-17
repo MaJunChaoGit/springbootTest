@@ -1,11 +1,20 @@
 package com.mjc.realtime.entity;
 
 public class Options {
+    private String id;
     private String type;
     private String ascriptions;
     private String position;
     private String phone;
-    private String time;
+    private String time = "";
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getPhone() {
         return phone;
