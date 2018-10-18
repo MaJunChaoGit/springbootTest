@@ -1,0 +1,18 @@
+下载mysql镜像
+docker pull mysql
+
+运行mysql容器（挂载数据库数据到宿主机（持久化））
+docker run --name mysql57 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
+
+
+进入容器
+docker exec -it mysql5719 bash
+
+
+#登录mysql
+mysql -u root -p
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'momo!';
+
+在容器中执行以下sql即可用navicat登录数据库
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'momo';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'momo';

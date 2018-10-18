@@ -28,13 +28,12 @@
     <select id="getiInfomation" resultMap="movingTargetMap" parameterType="MovingTarget">
        select
               i.id,
-              t.url as type,
+              i.type,
               i.phone,
               i.ascriptions,
               i.startTime,
               i.endTime
         from base_infomation i
-        inner join types t on t.id = i.type
     </select>
 
     <insert id="saveInfomation" parameterType="MovingTarget" keyProperty="id">
