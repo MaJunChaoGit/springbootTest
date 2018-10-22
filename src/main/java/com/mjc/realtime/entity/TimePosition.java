@@ -1,6 +1,9 @@
 package com.mjc.realtime.entity;
 
-public class TimePosition {
+import java.io.Serializable;
+
+public class TimePosition implements Serializable {
+    private static final long serialVersionUID = 2945383354517207601L;
     private int id;
     private String time;
     private Double lon;

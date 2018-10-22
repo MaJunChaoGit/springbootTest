@@ -1,8 +1,10 @@
 package com.mjc.realtime.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MovingTarget {
+public class MovingTarget implements Serializable{
+    private static final long serialVersionUID = 380324744056871766L;
     private String id;
     private String startTime;
     private String endTime;

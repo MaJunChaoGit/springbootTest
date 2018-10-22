@@ -13,14 +13,8 @@ import org.springframework.web.filter.CorsFilter;
 
 @SpringBootApplication
 @MapperScan("com.mjc.realtime.mapper")
-public class RealtimeApplication extends SpringBootServletInitializer {
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-		return builder.sources(RealtimeApplication.class);
-	}
+public class RealtimeApplication{
 	public static void main(String[] args) {
 		SpringApplication.run(RealtimeApplication.class, args);
 	}
-
-
 }

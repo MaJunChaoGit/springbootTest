@@ -13,7 +13,7 @@ import javax.annotation.Resource;
 import java.text.ParseException;
 import java.util.List;
 
-@CrossOrigin(origins = "http://mozhengying.com", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:8085", maxAge = 3600)
 @RestController
 public class UserController {
 

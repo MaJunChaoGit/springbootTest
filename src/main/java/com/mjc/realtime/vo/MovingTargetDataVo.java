@@ -2,9 +2,13 @@ package com.mjc.realtime.vo;
 
 import com.mjc.realtime.entity.MovingTarget;
 
+
+import java.io.Serializable;
 import java.util.List;
 
-public class MovingTargetDataVo {
+public class MovingTargetDataVo implements Serializable{
+
+    private static final long serialVersionUID = -4124713900999435110L;
     private String overallStarttime;
     private String overallEndtime;
     private int multiplier = 1;

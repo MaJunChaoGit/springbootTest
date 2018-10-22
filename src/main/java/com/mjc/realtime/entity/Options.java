@@ -1,6 +1,9 @@
 package com.mjc.realtime.entity;
 
-public class Options {
+import java.io.Serializable;
+
+public class Options implements Serializable{
+    private static final long serialVersionUID = 1020722411732919750L;
     private String id;
     private String type;
     private String ascriptions;
