@@ -1,22 +1,25 @@
 package com.mjc.realtime.service.impl;
 
+import com.mjc.realtime.entity.Heatmap;
+import com.mjc.realtime.entity.LocationBean;
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.entity.TimePosition;
 import com.mjc.realtime.mapper.IMovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
-import com.mjc.realtime.utils.RedisUtil;
+import com.mjc.realtime.utils.GeoHash;
 import com.mjc.realtime.vo.MovingTargetDataVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -27,6 +30,7 @@ public class MovingTargetService implements IMovingTargetService{
 
     @Autowired
     private RedisTemplate redisTemplate;
+    private String redisKey = "movingTarget";
 
     public int compareData(String date1, String date2) throws ParseException {
         if (date1.equals("") || date2.equals("")) return 0;
@@ -41,12 +45,11 @@ public class MovingTargetService implements IMovingTargetService{
     @Override
     public MovingTargetDataVo getMovingTargetInfo(){
 
-        String key = "movingTarget";
         ValueOperations<String, MovingTargetDataVo> operations = redisTemplate.opsForValue();
 
-        boolean hasKey = redisTemplate.hasKey(key);
+        boolean hasKey = redisTemplate.hasKey(redisKey);
         if (hasKey) {
-            MovingTargetDataVo movingTargetDataVo = operations.get(key);
+            MovingTargetDataVo movingTargetDataVo = operations.get(redisKey);
             return movingTargetDataVo;
         }
         // 获取数据库中所有的动目标信息
@@ -80,21 +83,54 @@ public class MovingTargetService implements IMovingTargetService{
         movingTargetDataVo.setOverallEndtime(overallEndtime);
         // 设置动目标数据给Vo类
         movingTargetDataVo.setData(movingTargets);
-        operations.set(key, movingTargetDataVo, 30, TimeUnit.MINUTES);
+        operations.set(redisKey, movingTargetDataVo, 30, TimeUnit.MINUTES);
         return movingTargetDataVo;
     }
 
     @Override
     public int saveMovingTarget(MovingTarget movingTarget) {
-
         int positionsCount = 0;
         movingTargetDAO.saveInfomation(movingTarget);
         String pid = movingTarget.getId();
 
         for (TimePosition timePosition : movingTarget.getTimePositions()) {
             timePosition.setPid(pid);
-            positionsCount = movingTargetDAO.saveTimePosition(timePosition);
+            positionsCount += movingTargetDAO.saveTimePosition(timePosition);
+        }
+
+        if (positionsCount > 0) {
+            redisTemplate.delete(redisKey);
         }
         return positionsCount;
+    }
+
+    @Override
+    public void saveHeatmap() {
+        List<TimePosition> timePositions = movingTargetDAO.getTimePosition();
+        HashMap<String, Integer> geohashMap = new HashMap<String, Integer> ();
+        for (TimePosition timePosition : timePositions) {
+            String hash = timePosition.getGeohash().substring(0, 6);
+            if (geohashMap.containsKey(hash)){
+                Integer count = geohashMap.get(hash);
+                count++;
+                geohashMap.put(hash, count);
+            } else {
+                geohashMap.put(hash, 1);
+            }
+        }
+        for (Map.Entry entry : geohashMap.entrySet()) {
+            Heatmap heat = new Heatmap();
+            heat.setGeohash((String) entry.getKey());
+            heat.setValue((int) entry.getValue());
+            GeoHash g = new GeoHash();
+            LocationBean bean = g.getLocation(heat.getGeohash());
+            heat.setLon(bean.getLng());
+            heat.setLat(bean.getLat());
+            movingTargetDAO.UpdateOrInsertHeatmap(heat);
+        }
+    }
+
+    public List<Heatmap> getHeatmap() {
+        return movingTargetDAO.getHeatmap();
     }
 }

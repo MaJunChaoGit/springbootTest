@@ -1,15 +1,12 @@
 package com.mjc.realtime.controller;
 
+import com.mjc.realtime.entity.Heatmap;
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
 import com.mjc.realtime.vo.MovingTargetDataVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.text.ParseException;
 import java.util.List;
 
@@ -20,6 +17,10 @@ public class UserController {
     @Autowired
     private IMovingTargetService movingTargetService;
 
+    /**
+     * 获取当前各种车辆动目标信息
+     * @return
+     */
     @RequestMapping(value = "/movingTargets", method = {RequestMethod.GET})
     public MovingTargetDataVo movingTargets(){
         try {
@@ -30,9 +31,23 @@ public class UserController {
         return null;
     }
 
+    /**
+     * 保存动目标信息接口
+     * @param movingTarget
+     * @return
+     */
     @RequestMapping(value = "/saveMovingTarget", method = {RequestMethod.POST})
     public int saveMovingTarget(@RequestBody MovingTarget movingTarget) {
         return movingTargetService.saveMovingTarget(movingTarget);
+    }
+
+    @RequestMapping(value = "/saveHeatmap", method = {RequestMethod.GET})
+    public void saveHeatmap() {
+        movingTargetService.saveHeatmap();
+    }
+    @RequestMapping(value = "/heatmap", method = {RequestMethod.GET})
+    public List<Heatmap> getHeatmap() {
+        return movingTargetService.getHeatmap();
     }
 //    @RequestMapping(value = "/users", method = { RequestMethod.GET })
 //    public List<User> users(UserParamVo param) {

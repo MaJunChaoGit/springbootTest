@@ -20,9 +20,14 @@
                 t.lon,
                 t.lat,
                 t.height,
-                t.pid
+                t.pid,
+                t.geohash
         from time_position t
-        where pid = #{id}
+        <where>
+            <if test="_parameter !=null and _parameter !=''">
+                pid = #{id}
+            </if>
+        </where>
     </select>
 
     <select id="getiInfomation" resultMap="movingTargetMap" parameterType="MovingTarget">
@@ -49,4 +54,29 @@
         VALUES
         (#{time}, #{lon}, #{lat}, #{height}, #{pid})
     </insert>
+
+    <insert id="UpdateOrInsertHeatmap" useGeneratedKeys="true" keyProperty="id" parameterType="Heatmap">
+        <selectKey keyProperty="count" resultType="int" order="BEFORE">
+            select count(*) from heatmap where geohash = #{geohash}
+        </selectKey>
+
+        <if test="count > 0">
+            UPDATE heatmap
+            <set>
+                <if test="value != null">
+                    value = #{value}
+                </if>
+            </set>
+            <where>
+                geohash = #{geohash}
+            </where>
+        </if>
+        <if test="count == 0">
+            insert into heatmap(lon, lat, geohash, value) values(#{lon}, #{lat}, #{geohash}, #{value})
+        </if>
+    </insert>
+
+    <select id="getHeatmap" resultType="Heatmap">
+        select * from heatmap
+    </select>
 </mapper>

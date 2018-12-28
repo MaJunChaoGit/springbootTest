@@ -10,7 +10,20 @@ public class TimePosition implements Serializable {
     private Double lat;
     private Double height;
     private String pid;
+    private String geohash;
     private MovingTarget movingTarget;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getGeohash() {
+        return geohash;
+    }
+
+    public void setGeohash(String geohash) {
+        this.geohash = geohash;
+    }
 
     public MovingTarget getMovingTarget() {
         return movingTarget;
