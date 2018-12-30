@@ -1,4 +1,4 @@
 运行mysql容器（挂载数据库数据到宿主机（持久化））
 docker run --name mysql57 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
 运行redis
-docker run -p 6379:6379 -v /usr/pf/docker/volumn/db/redis:/data --name myredis -d 1babb1dde7e1 redis-server --appendonly yes --requirepass "pf@123456"
+docker run -p 6379:6379 --name myredis -v /root/redis/redis.conf:/etc/redis/redis.conf -v /root/redis/data:/data -d 1babb1dde7e1 redis-server /etc/redis/redis.conf --appendonly yes --requirepass "pf@123456"
