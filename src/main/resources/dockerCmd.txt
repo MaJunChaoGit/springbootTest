@@ -1,6 +1,6 @@
 运行mysql容器（挂载数据库数据到宿主机（持久化））
 docker run --name mysql57 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
-mysql配置文件要加以下配置，这样访问速度提升很多
+mysql配置文件要加以下配置，这样访问速度提升？ 试验了貌似没有提升
 skip-name-resolve
 innodb_flush_log_at_trx_commit=0
 sync_binlog=0
