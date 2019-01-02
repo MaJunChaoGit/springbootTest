@@ -61,25 +61,76 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!--<plugin>-->
+				<!--<groupId>com.spotify</groupId>-->
+				<!--<artifactId>docker-maven-plugin</artifactId>-->
+				<!--<version>0.4.13</version>-->
+				<!--<configuration>-->
+					<!--<imageName>realtime</imageName>-->
+					<!--<baseImage>java</baseImage>-->
+					<!--<entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>-->
+					<!--<dockerHost>http://66.42.101.210:2375</dockerHost>-->
+					<!--<resources>-->
+						<!--<resource>-->
+							<!--<targetPath>/</targetPath>-->
+							<!--<directory>${project.build.directory}</directory>-->
+							<!--<include>${project.build.finalName}.jar</include>-->
+						<!--</resource>-->
+					<!--</resources>-->
+				<!--</configuration>-->
+			<!--</plugin>-->
 			<plugin>
-				<groupId>com.spotify</groupId>
+				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.4.13</version>
+				<version>0.20.0</version>
+				<extensions>true</extensions>
 				<configuration>
-					<imageName>realtime</imageName>
-					<baseImage>java</baseImage>
-					<entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
 					<dockerHost>http://66.42.101.210:2375</dockerHost>
-					<resources>
-						<resource>
-							<targetPath>/</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.jar</include>
-						</resource>
-					</resources>
+					<images>
+						<image>
+							<name>${project.artifactId}</name>
+							<alias>${project.artifactId}</alias>
+							<build>
+								<from>tomcat:8.5-alpine</from>
+								<tags><!-- define additional tags for the image -->
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+								<assembly>
+									<descriptor>assembly.xml</descriptor>
+									<basedir>/</basedir>
+								</assembly>
+								<ports>
+									<port>8080</port>
+								</ports>
+							</build>
+							<run>
+								<namingStrategy>alias</namingStrategy>
+								<ports>
+									<port>0.0.0.0:8080:8080</port>
+								</ports>
+							</run>
+						</image>
+					</images>
 				</configuration>
+				<executions>
+					<!-- 以下为插件与Maven声明周期做绑定，可选择使用 -->
+					<!--<execution>-->
+					<!--<id>build-docker-image</id>-->
+					<!--<phase>package</phase>-->
+					<!--<goals>-->
+					<!--<goal>build</goal>-->
+					<!--</goals>-->
+					<!--</execution>-->
+					<!--<execution>-->
+					<!--<id>push-docker-image-to-registry</id>-->
+					<!--<phase>deploy-goho</phase>-->
+					<!--<goals>-->
+					<!--<goal>push</goal>-->
+					<!--</goals>-->
+					<!--</execution>-->
+				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 
