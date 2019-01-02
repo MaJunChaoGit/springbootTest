@@ -95,6 +95,10 @@ public class MovingTargetService implements IMovingTargetService{
 
         for (TimePosition timePosition : movingTarget.getTimePositions()) {
             timePosition.setPid(pid);
+            GeoHash g = new GeoHash(timePosition.getLat(), timePosition.getLon());
+            g.sethashLength(12);
+            String geoHash = g.getGeoHashBase32();
+            timePosition.setGeohash(geoHash);
             positionsCount += movingTargetDAO.saveTimePosition(timePosition);
         }
 

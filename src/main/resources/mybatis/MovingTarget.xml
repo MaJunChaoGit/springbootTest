@@ -50,9 +50,9 @@
 
     <insert id="saveTimePosition" parameterType="TimePosition" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO time_position
-        (time, lon, lat, height, pid)
+        (time, lon, lat, height, pid, geohash)
         VALUES
-        (#{time}, #{lon}, #{lat}, #{height}, #{pid})
+        (#{time}, #{lon}, #{lat}, #{height}, #{pid}, #{geohash})
     </insert>
 
     <insert id="UpdateOrInsertHeatmap" useGeneratedKeys="true" keyProperty="id" parameterType="Heatmap">

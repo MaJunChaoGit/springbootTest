@@ -19,6 +19,7 @@ public class RealtimeApplication extends SpringBootServletInitializer{
 		SpringApplication.run(RealtimeApplication.class, args);
 	}
 //	 extends SpringBootServletInitializer
+
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(RealtimeApplication.class);
