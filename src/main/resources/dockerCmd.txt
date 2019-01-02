@@ -7,3 +7,7 @@ sync_binlog=0
 
 运行redis
 docker run -p 6379:6379 --name myredis -v /root/redis/redis.conf:/etc/redis/redis.conf -v /root/redis/data:/data -d 1babb1dde7e1 redis-server /etc/redis/redis.conf --appendonly yes --requirepass "pf@123456"
+
+1.配置docker远程api
+2.使用maven-docker-plugin
+3.命令mvn clean package docker:build
