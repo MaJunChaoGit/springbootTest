@@ -10,6 +10,6 @@ import java.util.List;
 public interface IMovingTargetService {
     public MovingTargetDataVo getMovingTargetInfo() throws ParseException;
     public int saveMovingTarget(MovingTarget movingTarget);
-    public void saveHeatmap();
+    public int saveHeatmap();
     public List<Heatmap> getHeatmap();
 }

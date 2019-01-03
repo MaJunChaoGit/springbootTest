@@ -4,9 +4,10 @@ import com.mjc.realtime.entity.Heatmap;
 import com.mjc.realtime.entity.LocationBean;
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.entity.TimePosition;
-import com.mjc.realtime.mapper.IMovingTarget;
+import com.mjc.realtime.dao.mapper.IMovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
 import com.mjc.realtime.utils.GeoHash;
+import com.mjc.realtime.utils.Timer;
 import com.mjc.realtime.vo.MovingTargetDataVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -43,6 +44,7 @@ public class MovingTargetService implements IMovingTargetService{
         return -1;
     }
     @Override
+    @Timer
     public MovingTargetDataVo getMovingTargetInfo(){
 
         ValueOperations<String, MovingTargetDataVo> operations = redisTemplate.opsForValue();
@@ -109,9 +111,10 @@ public class MovingTargetService implements IMovingTargetService{
     }
 
     @Override
-    public void saveHeatmap() {
+    public int saveHeatmap() {
         List<TimePosition> timePositions = movingTargetDAO.getTimePosition();
         HashMap<String, Integer> geohashMap = new HashMap<String, Integer> ();
+        int sum = 0;
         for (TimePosition timePosition : timePositions) {
             String hash = timePosition.getGeohash().substring(0, 6);
             if (geohashMap.containsKey(hash)){
@@ -131,7 +134,9 @@ public class MovingTargetService implements IMovingTargetService{
             heat.setLon(bean.getLng());
             heat.setLat(bean.getLat());
             movingTargetDAO.UpdateOrInsertHeatmap(heat);
+            sum++;
         }
+        return sum;
     }
 
     public List<Heatmap> getHeatmap() {

@@ -4,6 +4,7 @@ import com.mjc.realtime.entity.Heatmap;
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
 import com.mjc.realtime.vo.MovingTargetDataVo;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class UserController {
 
     @Autowired
     private IMovingTargetService movingTargetService;
-
+    private static Logger log  = Logger.getLogger(UserController.class);
     /**
      * 获取当前各种车辆动目标信息
      * @return
@@ -24,9 +25,12 @@ public class UserController {
     @RequestMapping(value = "/movingTargets", method = {RequestMethod.GET})
     public MovingTargetDataVo movingTargets(){
         try {
-            return movingTargetService.getMovingTargetInfo();
+            MovingTargetDataVo movingTargetDataVo = movingTargetService.getMovingTargetInfo();
+            if (movingTargetDataVo != null) log.info("获取动目标信息成功");
+            return movingTargetDataVo;
         } catch (ParseException e) {
             e.printStackTrace();
+            log.error("获取动目标信息失败");
         }
         return null;
     }
@@ -38,16 +42,34 @@ public class UserController {
      */
     @RequestMapping(value = "/saveMovingTarget", method = {RequestMethod.POST})
     public int saveMovingTarget(@RequestBody MovingTarget movingTarget) {
-        return movingTargetService.saveMovingTarget(movingTarget);
+        int count = movingTargetService.saveMovingTarget(movingTarget);
+        if (count != 0) {
+            log.info("保存动目标成功");
+        } else {
+            log.error("保存动目标失败");
+        }
+        return count;
     }
 
     @RequestMapping(value = "/saveHeatmap", method = {RequestMethod.GET})
-    public void saveHeatmap() {
-        movingTargetService.saveHeatmap();
+    public int saveHeatmap() {
+        int count = movingTargetService.saveHeatmap();
+        if (count != 0) {
+            log.info("保存热力图成功");
+        } else {
+            log.error("保存热力图失败");
+        }
+        return count;
     }
     @RequestMapping(value = "/heatmap", method = {RequestMethod.GET})
     public List<Heatmap> getHeatmap() {
-        return movingTargetService.getHeatmap();
+        List<Heatmap> heatmap = movingTargetService.getHeatmap();
+        if (!heatmap.isEmpty()) {
+            log.info("获取" + heatmap.size() + "热力图数据");
+        } else {
+            log.error("没有热力图数据");
+        }
+        return heatmap;
     }
 //    @RequestMapping(value = "/users", method = { RequestMethod.GET })
 //    public List<User> users(UserParamVo param) {

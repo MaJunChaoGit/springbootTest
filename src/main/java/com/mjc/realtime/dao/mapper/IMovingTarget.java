@@ -1,4 +1,4 @@
-package com.mjc.realtime.mapper;
+package com.mjc.realtime.dao.mapper;
 
 import com.mjc.realtime.entity.Heatmap;
 import com.mjc.realtime.entity.MovingTarget;
