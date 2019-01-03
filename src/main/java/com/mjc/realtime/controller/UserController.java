@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class UserController {
     @Autowired
     private IMovingTargetService movingTargetService;
     private static Logger log  = Logger.getLogger(UserController.class);
+
     /**
      * 获取当前各种车辆动目标信息
      * @return
