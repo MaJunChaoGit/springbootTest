@@ -1,6 +1,7 @@
 package com.mjc.realtime.controller;
 
 import com.mjc.realtime.entity.Heatmap;
+import com.mjc.realtime.entity.LifeCircle;
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
 import com.mjc.realtime.vo.MovingTargetDataVo;
@@ -21,18 +22,18 @@ public class UserController {
     private static Logger log  = Logger.getLogger(UserController.class);
 
     /**
-     * 获取当前各种车辆动目标信息
+     * 获取动目标信息开始结束时间
      * @return
      */
-    @RequestMapping(value = "/movingTargets", method = {RequestMethod.GET})
-    public MovingTargetDataVo movingTargets(){
+    @RequestMapping(value = "/lifeCircle", method = {RequestMethod.GET})
+    public LifeCircle movingTargets(){
         try {
-            MovingTargetDataVo movingTargetDataVo = movingTargetService.getMovingTargetInfo();
-            if (movingTargetDataVo != null) log.info("获取动目标信息成功");
-            return movingTargetDataVo;
+            LifeCircle lifeCircle = movingTargetService.getLifeCircle();
+            if (lifeCircle != null) log.info("获取动目标信息开始结束时间成功");
+            return lifeCircle;
         } catch (ParseException e) {
             e.printStackTrace();
-            log.error("获取动目标信息失败");
+            log.error("获取动目标信息开始结束时间失败");
         }
         return null;
     }

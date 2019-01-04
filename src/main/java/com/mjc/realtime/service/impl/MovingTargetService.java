@@ -1,9 +1,6 @@
 package com.mjc.realtime.service.impl;
 
-import com.mjc.realtime.entity.Heatmap;
-import com.mjc.realtime.entity.LocationBean;
-import com.mjc.realtime.entity.MovingTarget;
-import com.mjc.realtime.entity.TimePosition;
+import com.mjc.realtime.entity.*;
 import com.mjc.realtime.dao.mapper.IMovingTarget;
 import com.mjc.realtime.service.IMovingTargetService;
 import com.mjc.realtime.utils.GeoHash;
@@ -24,14 +21,18 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class MovingTargetService implements IMovingTargetService{
+public class MovingTargetService implements IMovingTargetService {
 
     @Autowired
     private IMovingTarget movingTargetDAO;
 
     @Autowired
     private RedisTemplate redisTemplate;
-    private String redisKey = "movingTarget";
+    private final String lifeCircleKey = "lifeCircle";
+    private final String movingTargetsKey = "movingTaget";
+    public static String startTime;
+    public static String endTime;
+    public static List<MovingTarget> movingTargets;
 
     public int compareData(String date1, String date2) throws ParseException {
         if (date1.equals("") || date2.equals("")) return 0;
@@ -39,23 +40,29 @@ public class MovingTargetService implements IMovingTargetService{
         Date startTimeOrigin = df.parse(date1);
         Date startTimeNew = df.parse(date2);
         if (startTimeOrigin.getTime() > startTimeNew.getTime()) {
-           return 1;
+            return 1;
         }
         return -1;
     }
+
     @Override
     @Timer
-    public MovingTargetDataVo getMovingTargetInfo(){
+    public LifeCircle getLifeCircle() {
 
-        ValueOperations<String, MovingTargetDataVo> operations = redisTemplate.opsForValue();
+        ValueOperations<String, LifeCircle> operationLifeCircle = redisTemplate.opsForValue();
 
-        boolean hasKey = redisTemplate.hasKey(redisKey);
-        if (hasKey) {
-            MovingTargetDataVo movingTargetDataVo = operations.get(redisKey);
-            return movingTargetDataVo;
+        if (redisTemplate.hasKey(lifeCircleKey)) {
+            LifeCircle lifeCircle = operationLifeCircle.get(lifeCircleKey);
+            return lifeCircle;
         }
-        // 获取数据库中所有的动目标信息
-        List<MovingTarget> movingTargets = movingTargetDAO.getiInfomation();
+        ValueOperations<String, List<MovingTarget>> operationMovingTargets = redisTemplate.opsForValue();
+        if (redisTemplate.hasKey(movingTargetsKey)) {
+            // 如果redis有就从redis取出
+            movingTargets = operationMovingTargets.get(movingTargetsKey);
+        } else {
+            // 获取数据库中所有的动目标信息
+            movingTargets = movingTargetDAO.getiInfomation();
+        }
         // 新建一个动目标Vo类
         MovingTargetDataVo movingTargetDataVo = new MovingTargetDataVo();
         // 获取第一个动目标的起始时间
@@ -81,12 +88,16 @@ public class MovingTargetService implements IMovingTargetService{
             }
         }
         // 设置起始和结束时间
-        movingTargetDataVo.setOverallStarttime(overallStarttime);
-        movingTargetDataVo.setOverallEndtime(overallEndtime);
-        // 设置动目标数据给Vo类
-        movingTargetDataVo.setData(movingTargets);
-        operations.set(redisKey, movingTargetDataVo, 30, TimeUnit.MINUTES);
-        return movingTargetDataVo;
+        LifeCircle lifeCircle = new LifeCircle();
+        lifeCircle.setOverallStarttime(overallStarttime);
+        lifeCircle.setOverallEndtime(overallEndtime);
+        lifeCircle.setMultiplier(1);
+        startTime = overallStarttime;
+        endTime = overallEndtime;
+        // 存入redis
+        operationLifeCircle.set(lifeCircleKey, lifeCircle, 50, TimeUnit.MINUTES);
+        operationMovingTargets.set(movingTargetsKey, movingTargets, 50, TimeUnit.MINUTES);
+        return lifeCircle;
     }
 
     @Override
@@ -105,7 +116,7 @@ public class MovingTargetService implements IMovingTargetService{
         }
 
         if (positionsCount > 0) {
-            redisTemplate.delete(redisKey);
+            redisTemplate.delete(movingTargetsKey);
         }
         return positionsCount;
     }
@@ -113,11 +124,11 @@ public class MovingTargetService implements IMovingTargetService{
     @Override
     public int saveHeatmap() {
         List<TimePosition> timePositions = movingTargetDAO.getTimePosition();
-        HashMap<String, Integer> geohashMap = new HashMap<String, Integer> ();
+        HashMap<String, Integer> geohashMap = new HashMap<String, Integer>();
         int sum = 0;
         for (TimePosition timePosition : timePositions) {
             String hash = timePosition.getGeohash().substring(0, 6);
-            if (geohashMap.containsKey(hash)){
+            if (geohashMap.containsKey(hash)) {
                 Integer count = geohashMap.get(hash);
                 count++;
                 geohashMap.put(hash, count);
