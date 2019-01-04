@@ -1,6 +1,7 @@
 package com.mjc.realtime.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovingTarget implements Serializable{
@@ -9,7 +10,7 @@ public class MovingTarget implements Serializable{
     private String startTime;
     private String endTime;
     private Options options;
-    private List<TimePosition> timePositions;
+    private List<TimePosition> timePositions = new ArrayList<TimePosition>();
 
 
     public String getStartTime() {

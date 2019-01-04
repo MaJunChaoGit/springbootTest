@@ -1,11 +1,13 @@
 package com.mjc.realtime.controller;
 
+import com.mjc.realtime.entity.MessageBean;
 import com.mjc.realtime.entity.MovingTarget;
 import com.mjc.realtime.entity.TimePosition;
 import com.mjc.realtime.service.impl.MovingTargetService;
+import com.mjc.realtime.utils.ServerEncoder;
+import com.mjc.realtime.utils.Timer;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
@@ -19,22 +21,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-@ServerEndpoint(value = "/movingTargets")
+@ServerEndpoint(value = "/movingTargets", encoders = {ServerEncoder.class})
 @Component
-public class WebSocketServer {
+public class MovingTargetsServer {
     private static Logger log = Logger.getLogger(UserController.class);
     private static int onlineCount = 0;
     private static final int delay = 5000;
-    private static CopyOnWriteArraySet<WebSocketServer> webSocketSet = new CopyOnWriteArraySet<WebSocketServer>();
+    private static CopyOnWriteArraySet<MovingTargetsServer> webSocketSet = new CopyOnWriteArraySet<MovingTargetsServer>();
     private Session session;
     private String sid = "";
     private List<MovingTarget> movingTargetList;
     private Date startTime = null;
     private Date leftTime = null;
     private Date endTime = null;
+    private String status = "pending";
+
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
+        this.status = "opening";
         webSocketSet.add(this);
         addOnlineCount();
         log.info("有新窗口开始监听:" + sid + ",当前在线人数为" + getOnlineCount());
@@ -65,6 +70,7 @@ public class WebSocketServer {
         time.setTime(startTime);
         time.add(Calendar.MILLISECOND, delay);
         Date rightTime = time.getTime();
+        if (rightTime.compareTo(endTime) >= 0 || !this.status.equals("opening")) return;
         // 获取时间轴左边时间
         leftTime = (Date) startTime.clone();
 
@@ -85,7 +91,7 @@ public class WebSocketServer {
                 }
 
                 // 计算区间时间，进行比对，是否目标时间在区间时间内
-                if (isEffectiveDate(targetTime, leftTime, rightTime) && rightTime.compareTo(endTime) < 0) {
+                if (isEffectiveDate(targetTime, leftTime, rightTime)) {
                     target.getTimePositions().add(timePosition);
                 }
             }
@@ -94,9 +100,16 @@ public class WebSocketServer {
         // 重时间轴推进
         startTime = (Date) rightTime.clone();
         try {
-            this.session.getBasicRemote().sendObject(list);
+            MessageBean messageBean = new MessageBean();
+            messageBean.setData(list);
+            this.session.getBasicRemote().sendObject(messageBean);
         } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                this.session.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return;
         } catch (EncodeException e) {
             e.printStackTrace();
         }
@@ -112,6 +125,7 @@ public class WebSocketServer {
     public void onClose() {
         webSocketSet.remove(this);
         subOnlineCount();
+        this.status = "close";
         log.info(sid + "连接关闭！当前在线人数为" + getOnlineCount());
     }
 
@@ -119,7 +133,7 @@ public class WebSocketServer {
     public void onMessage(String message, Session session) {
         log.info("收到来自窗口" + sid + "的信息:" + message);
         //群发消息
-        for (WebSocketServer item : webSocketSet) {
+        for (MovingTargetsServer item : webSocketSet) {
             try {
                 item.sendMessage(message);
             } catch (IOException e) {
@@ -130,13 +144,19 @@ public class WebSocketServer {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("发生错误");
-        error.printStackTrace();
+        this.status = "error";
+        try {
+            log.error("客户端断开链接,链接关闭");
+            session.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void sendInfo(String message, @PathParam("sid") String sid) throws IOException {
         log.info("推送消息到窗口" + sid + "，推送内容:" + message);
-        for (WebSocketServer item : webSocketSet) {
+        for (MovingTargetsServer item : webSocketSet) {
             try {
                 //这里可以设定只推送给这个sid的，为null则全部推送
                 if (sid == null) {
@@ -185,14 +205,14 @@ public class WebSocketServer {
     }
 
     private static synchronized void subOnlineCount() {
-        WebSocketServer.onlineCount--;
+        MovingTargetsServer.onlineCount--;
     }
 
     private static synchronized int getOnlineCount() {
-        return WebSocketServer.onlineCount;
+        return MovingTargetsServer.onlineCount;
     }
 
     private static synchronized void addOnlineCount() {
-        WebSocketServer.onlineCount++;
+        MovingTargetsServer.onlineCount++;
     }
 }

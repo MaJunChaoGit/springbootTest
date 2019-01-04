@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -32,9 +29,10 @@ public class MovingTargetService implements IMovingTargetService {
     private final String movingTargetsKey = "movingTaget";
     public static String startTime;
     public static String endTime;
-    public static List<MovingTarget> movingTargets;
+    public static List<MovingTarget> movingTargets = new ArrayList<MovingTarget>();
 
-    public int compareData(String date1, String date2) throws ParseException {
+
+    private int compareData(String date1, String date2) throws ParseException {
         if (date1.equals("") || date2.equals("")) return 0;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         Date startTimeOrigin = df.parse(date1);
@@ -44,27 +42,45 @@ public class MovingTargetService implements IMovingTargetService {
         }
         return -1;
     }
-
-    @Override
     @Timer
-    public LifeCircle getLifeCircle() {
+    private LifeCircle getLifeCircleForRedis() {
 
         ValueOperations<String, LifeCircle> operationLifeCircle = redisTemplate.opsForValue();
-
         if (redisTemplate.hasKey(lifeCircleKey)) {
             LifeCircle lifeCircle = operationLifeCircle.get(lifeCircleKey);
+            startTime = lifeCircle.getOverallStarttime();
+            endTime = lifeCircle.getOverallEndtime();
             return lifeCircle;
         }
+        return null;
+    }
+    @Timer
+    private List<MovingTarget> getMovingTarget() {
         ValueOperations<String, List<MovingTarget>> operationMovingTargets = redisTemplate.opsForValue();
+        List<MovingTarget> movingTargets;
         if (redisTemplate.hasKey(movingTargetsKey)) {
             // 如果redis有就从redis取出
             movingTargets = operationMovingTargets.get(movingTargetsKey);
         } else {
             // 获取数据库中所有的动目标信息
             movingTargets = movingTargetDAO.getiInfomation();
+            // 存入redis
+            operationMovingTargets.set(movingTargetsKey, movingTargets, 50, TimeUnit.MINUTES);
         }
-        // 新建一个动目标Vo类
-        MovingTargetDataVo movingTargetDataVo = new MovingTargetDataVo();
+        return movingTargets;
+    }
+
+    @Override
+    @Timer
+    public LifeCircle getTimeInterval() {
+        // 获取动目标数据
+        movingTargets = getMovingTarget();
+        // 如果redis里面没有数据的话就需要自己判断了
+        LifeCircle lifeCircle = getLifeCircleForRedis();
+        if (lifeCircle != null) return lifeCircle;
+
+        // 设置起始和结束时间
+        lifeCircle = new LifeCircle();
         // 获取第一个动目标的起始时间
         String overallStarttime = movingTargets.get(0).getStartTime();
         // 获取第一个动目标的结束时间
@@ -87,16 +103,15 @@ public class MovingTargetService implements IMovingTargetService {
                 e.printStackTrace();
             }
         }
-        // 设置起始和结束时间
-        LifeCircle lifeCircle = new LifeCircle();
+
         lifeCircle.setOverallStarttime(overallStarttime);
         lifeCircle.setOverallEndtime(overallEndtime);
         lifeCircle.setMultiplier(1);
         startTime = overallStarttime;
         endTime = overallEndtime;
         // 存入redis
+        ValueOperations<String, LifeCircle> operationLifeCircle = redisTemplate.opsForValue();
         operationLifeCircle.set(lifeCircleKey, lifeCircle, 50, TimeUnit.MINUTES);
-        operationMovingTargets.set(movingTargetsKey, movingTargets, 50, TimeUnit.MINUTES);
         return lifeCircle;
     }
 

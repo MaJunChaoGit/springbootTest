@@ -9,7 +9,7 @@ import java.text.ParseException;
 import java.util.List;
 
 public interface IMovingTargetService {
-    public LifeCircle getLifeCircle() throws ParseException;
+    public LifeCircle getTimeInterval() throws ParseException;
     public int saveMovingTarget(MovingTarget movingTarget);
     public int saveHeatmap();
     public List<Heatmap> getHeatmap();

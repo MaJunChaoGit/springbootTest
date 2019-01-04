@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
-@CrossOrigin(origins = "http://mozhengying.com", maxAge = 3600)
+@CrossOrigin(origins = "http://mozhengying:com", maxAge = 3600)
 @RestController
 public class UserController {
 
@@ -28,7 +28,7 @@ public class UserController {
     @RequestMapping(value = "/lifeCircle", method = {RequestMethod.GET})
     public LifeCircle movingTargets(){
         try {
-            LifeCircle lifeCircle = movingTargetService.getLifeCircle();
+            LifeCircle lifeCircle = movingTargetService.getTimeInterval();
             if (lifeCircle != null) log.info("获取动目标信息开始结束时间成功");
             return lifeCircle;
         } catch (ParseException e) {
